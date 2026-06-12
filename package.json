@@ -1,0 +1,9 @@
+{
+  "name": "compass",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Compass — an EQ journal that turns feelings into patterns into goals. Zero-build PWA.",
+  "scripts": {
+    "dev": "npx http-server -p 4280 -c-1 -o ."
+  }
+}

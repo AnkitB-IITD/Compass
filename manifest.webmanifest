@@ -1,0 +1,15 @@
+{
+  "name": "Compass — EQ Journal & Goals",
+  "short_name": "Compass",
+  "description": "A private journal that helps you name your feelings, see your patterns, and turn them into goals.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f6f3",
+  "theme_color": "#f7f6f3",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
