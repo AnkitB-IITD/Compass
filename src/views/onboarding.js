@@ -6,11 +6,11 @@
 import { el, icon, toast } from '../ui.js';
 import { setMeta } from '../db.js';
 import { setPrefs, requestNotificationPermission } from '../checkin.js';
-import { setKey, testKey } from '../ai.js';
+import { PROVIDERS, getProvider, setProvider, setKey, testKey } from '../ai.js';
 
 export async function onboardingView({ navigate }) {
   let step = 0;
-  const state = { perDay: 3, quietStart: '22:00', quietEnd: '08:00', key: '' };
+  const state = { perDay: 3, quietStart: '22:00', quietEnd: '08:00', provider: await getProvider() };
 
   const view = el('div', { class: 'onb' });
 
@@ -61,15 +61,36 @@ export async function onboardingView({ navigate }) {
         }, 'Continue'),
       );
     } else {
-      const keyInput = el('input', { type: 'password', placeholder: 'sk-ant-…', autocomplete: 'off' });
+      const conf = PROVIDERS[state.provider];
+      const providerSelect = el('select', {},
+        ...Object.entries(PROVIDERS).map(([id, p]) => {
+          const opt = el('option', { value: id }, p.label);
+          if (id === state.provider) opt.selected = true;
+          return opt;
+        }));
+      const keyInput = el('input', { type: 'password', placeholder: conf.keyHint, autocomplete: 'off' });
+      const helper = el('p', { class: 'dim small' });
+      const setHelper = () => {
+        const c = PROVIDERS[state.provider];
+        helper.textContent = `Get a key at ${c.keyUrl}. It’s stored on this device only and sent only to ${c.label}. You can change all this later in Settings.`;
+        keyInput.placeholder = c.keyHint;
+      };
+      setHelper();
+      providerSelect.addEventListener('change', async () => {
+        state.provider = providerSelect.value;
+        await setProvider(state.provider);
+        setHelper();
+      });
+
       const status = el('p', { class: 'dim small' });
       view.append(
         el('h1', {}, 'AI insights (optional)'),
-        el('p', { class: 'dim' }, 'Paste your own Claude API key to unlock pattern analysis and goal suggestions. Without it, the journal, check-ins and manual goals all still work.'),
+        el('p', { class: 'dim' }, 'Pick your AI provider and paste your own key to unlock pattern analysis and goal suggestions. Without it, the journal, check-ins and manual goals all still work.'),
         el('div', { class: 'stack' },
-          el('label', { class: 'field' }, el('span', {}, 'Claude API key'), keyInput),
+          el('label', { class: 'field' }, el('span', {}, 'AI provider'), providerSelect),
+          el('label', { class: 'field' }, el('span', {}, 'API key'), keyInput),
           status,
-          el('p', { class: 'dim small' }, 'The key is stored only on this device and sent only to Anthropic. Get one at console.anthropic.com. You can add or change it later in Settings.'),
+          helper,
         ),
         dots(),
         el('div', { class: 'stack' },
@@ -81,8 +102,8 @@ export async function onboardingView({ navigate }) {
               e.target.disabled = true;
               status.replaceChildren(el('span', { class: 'spinner' }), ' Checking the key…');
               try {
-                await testKey(key);
-                await setKey(key);
+                await testKey(key, state.provider);
+                await setKey(key, state.provider);
                 toast('Key verified ✓');
                 finish(navigate);
               } catch (err) {

@@ -6,12 +6,14 @@
 import { el, toast, confirmDialog } from '../ui.js';
 import { getMeta, setMeta, exportAll, wipeAll } from '../db.js';
 import { getPrefs, setPrefs, requestNotificationPermission } from '../checkin.js';
-import { getKey, setKey, testKey, getModel, setModel, MODELS } from '../ai.js';
+import { PROVIDERS, getProvider, setProvider, getKey, setKey, testKey, getModel, setModel, listModels } from '../ai.js';
 import { voiceSupported } from '../voice.js';
 
 export async function settingsView({ navigate }) {
+  const provider = await getProvider();
+  const conf = PROVIDERS[provider];
   const [key, model, prefs, theme, voiceLang] = await Promise.all([
-    getKey(), getModel(), getPrefs(), getMeta('theme', 'auto'), getMeta('voiceLang', ''),
+    getKey(provider), getModel(provider), getPrefs(), getMeta('theme', 'auto'), getMeta('voiceLang', ''),
   ]);
 
   const view = el('div', {});
@@ -19,22 +21,36 @@ export async function settingsView({ navigate }) {
 
   /* ---- AI ---- */
   view.append(el('h2', {}, 'AI insights'));
+
+  const providerSelect = el('select', {},
+    ...Object.entries(PROVIDERS).map(([id, p]) => {
+      const opt = el('option', { value: id }, p.label);
+      if (id === provider) opt.selected = true;
+      return opt;
+    }));
+  providerSelect.addEventListener('change', async () => {
+    await setProvider(providerSelect.value);
+    toast(`Switched to ${PROVIDERS[providerSelect.value].label}`);
+    navigate('settings'); // re-render so key + model fields match the provider
+  });
+
   const keyInput = el('input', {
     type: 'password',
-    placeholder: key ? '•••••••• (key saved)' : 'sk-ant-…',
+    placeholder: key ? '•••••••• (key saved)' : conf.keyHint,
     autocomplete: 'off',
   });
   const keyStatus = el('span', { class: 'dim small' });
   const modelSelect = el('select', {},
-    ...MODELS.map((m) => {
+    ...listModels(provider).map((m) => {
       const opt = el('option', { value: m.id }, m.label);
       if (m.id === model) opt.selected = true;
       return opt;
     }));
-  modelSelect.addEventListener('change', async () => { await setModel(modelSelect.value); toast('Model updated'); });
+  modelSelect.addEventListener('change', async () => { await setModel(modelSelect.value, provider); toast('Model updated'); });
 
   view.append(el('div', { class: 'card stack' },
-    el('label', { class: 'field', style: 'margin-bottom:0' }, el('span', {}, 'Claude API key'), keyInput),
+    el('label', { class: 'field', style: 'margin-bottom:0' }, el('span', {}, 'Provider'), providerSelect),
+    el('label', { class: 'field', style: 'margin-bottom:0' }, el('span', {}, `${conf.label} API key`), keyInput),
     el('div', { class: 'row' },
       el('button', {
         class: 'primary',
@@ -44,8 +60,8 @@ export async function settingsView({ navigate }) {
           e.target.disabled = true;
           keyStatus.replaceChildren(el('span', { class: 'spinner' }), ' Checking…');
           try {
-            await testKey(val);
-            await setKey(val);
+            await testKey(val, provider);
+            await setKey(val, provider);
             keyStatus.textContent = 'Key verified and saved ✓';
             keyInput.value = '';
             keyInput.placeholder = '•••••••• (key saved)';
@@ -57,12 +73,13 @@ export async function settingsView({ navigate }) {
       }, 'Save key'),
       key ? el('button', {
         class: 'ghost',
-        onclick: async () => { await setKey(null); toast('Key removed'); navigate('settings'); },
+        onclick: async () => { await setKey(null, provider); toast('Key removed'); navigate('settings'); },
       }, 'Remove key') : null,
       keyStatus,
     ),
     el('label', { class: 'field', style: 'margin-bottom:0' }, el('span', {}, 'Model'), modelSelect),
-    el('p', { class: 'dim small', style: 'margin:0' }, 'Your key lives only on this device and is sent only to Anthropic when you run an analysis.'),
+    el('p', { class: 'dim small', style: 'margin:0' },
+      `Get a key at ${conf.keyUrl}. Keys are stored per-provider on this device only, and sent only to ${conf.label} when you run an analysis.`),
   ));
 
   /* ---- Check-ins ---- */

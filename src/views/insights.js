@@ -6,13 +6,14 @@
 import { el, toast, fmtDay } from '../ui.js';
 import { familyOf } from '../emotions.js';
 import { listEntries, listInsights, saveInsight, saveGoal, uid } from '../db.js';
-import { getKey, analyzeEntries } from '../ai.js';
+import { getKey, getProvider, PROVIDERS, analyzeEntries } from '../ai.js';
 import { todayKey } from '../ui.js';
 
 const DAYS_30 = 30 * 86400000;
 
 export async function insightsView({ navigate }) {
-  const [entries, insights, key] = await Promise.all([listEntries(), listInsights(), getKey()]);
+  const [entries, insights, key, provider] = await Promise.all([listEntries(), listInsights(), getKey(), getProvider()]);
+  const providerLabel = PROVIDERS[provider].label;
   const view = el('div', {});
   view.append(el('h1', {}, 'Insights'));
 
@@ -24,8 +25,8 @@ export async function insightsView({ navigate }) {
 
   if (!key) {
     view.append(el('div', { class: 'card' },
-      el('p', {}, 'With your own Claude API key, Compass reads your recent entries and reflects back: recurring thought patterns, what seems to be weighing on you, what you aspire to — and concrete goals to act on it.'),
-      el('p', { class: 'dim small' }, 'Your key and journal stay on this device; entries are sent only to Anthropic when you tap Analyze.'),
+      el('p', {}, 'With your own AI provider key (Gemini, Claude or OpenAI), Compass reads your recent entries and reflects back: recurring thought patterns, what seems to be weighing on you, what you aspire to — and concrete goals to act on it.'),
+      el('p', { class: 'dim small' }, `Your key and journal stay on this device; entries are sent only to ${providerLabel} when you tap Analyze.`),
       el('button', { class: 'primary', onclick: () => navigate('settings') }, 'Add API key in Settings'),
     ));
     return view;

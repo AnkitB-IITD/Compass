@@ -39,17 +39,27 @@ load the service worker makes the shell fully offline.
 
 ## AI setup
 
-Settings → paste your Anthropic API key (`sk-ant-…`, from
-[console.anthropic.com](https://console.anthropic.com)). The key is stored in
-IndexedDB on your device only and sent only to `api.anthropic.com`. Default
-model is Claude Sonnet 4.6; switchable to Opus 4.8 or Haiku 4.5.
+Pick a provider and paste your own key (onboarding or Settings → AI insights).
+Compass works with any of:
+
+| Provider | Get a key | Default model |
+|---|---|---|
+| **Gemini** (Google) | aistudio.google.com/apikey | `gemini-2.5-flash` |
+| **Claude** (Anthropic) | console.anthropic.com | `claude-sonnet-4-6` |
+| **OpenAI** | platform.openai.com/api-keys | `gpt-4.1-mini` |
+
+Keys are stored per-provider in IndexedDB on your device only, and each is
+sent only to that provider's endpoint, only when you tap **Analyze**. Switch
+providers anytime in Settings — each remembers its own key and model. The AI
+layer is a thin adapter ([src/ai.js](src/ai.js)); adding another provider is a
+single entry with `buildRequest()` + `parse()`.
 
 ## Privacy
 
 - All data (entries, goals, insights, settings, API key) lives in IndexedDB
   on your device. Export anytime as JSON; delete everything in one tap.
-- AI analysis sends your recent entries to Anthropic **only when you tap
-  Analyze**, using your own key.
+- AI analysis sends your recent entries to your chosen provider (Gemini,
+  Claude or OpenAI) **only when you tap Analyze**, using your own key.
 - Voice dictation uses your browser's speech service (e.g. Google on Chrome)
   and needs internet; the app never stores audio — only the text you save.
 
