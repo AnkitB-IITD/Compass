@@ -48,7 +48,7 @@ export const PROVIDERS = {
     testModel: 'gemini-3.1-flash-lite',
     models: [
       { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash (recommended)' },
-      { id: 'gemini-3.1-pro', label: 'Gemini 3.1 Pro (smartest)' },
+      { id: 'gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro (smartest)' },
       { id: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite (fastest)' },
     ],
     buildRequest({ key, model, system, userText, schema, maxTokens }) {
@@ -108,17 +108,19 @@ export const PROVIDERS = {
     label: 'OpenAI',
     keyHint: 'sk-…',
     keyUrl: 'platform.openai.com/api-keys',
-    defaultModel: 'gpt-4.1-mini',
-    testModel: 'gpt-4o-mini',
+    defaultModel: 'gpt-5.5',
+    testModel: 'gpt-5.4-mini',
     models: [
-      { id: 'gpt-4.1-mini', label: 'GPT-4.1 mini (recommended)' },
-      { id: 'gpt-4.1', label: 'GPT-4.1 (smartest)' },
-      { id: 'gpt-4o-mini', label: 'GPT-4o mini (cheapest)' },
+      { id: 'gpt-5.5', label: 'GPT-5.5 (recommended)' },
+      { id: 'gpt-5.4', label: 'GPT-5.4 (more affordable)' },
+      { id: 'gpt-5.4-mini', label: 'GPT-5.4 mini (cheapest)' },
     ],
     buildRequest({ key, model, system, userText, schema, maxTokens }) {
       const body = {
         model,
-        max_tokens: maxTokens,
+        // GPT-5 family requires max_completion_tokens; max_tokens is rejected.
+        // max_completion_tokens is accepted across current models, so it's the safe choice.
+        max_completion_tokens: maxTokens,
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: userText },

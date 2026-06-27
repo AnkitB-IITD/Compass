@@ -46,7 +46,7 @@ Compass works with any of:
 |---|---|---|
 | **Gemini** (Google) | aistudio.google.com/apikey | `gemini-3.5-flash` |
 | **Claude** (Anthropic) | console.anthropic.com | `claude-sonnet-4-6` |
-| **OpenAI** | platform.openai.com/api-keys | `gpt-4.1-mini` |
+| **OpenAI** | platform.openai.com/api-keys | `gpt-5.5` |
 
 The model field is **editable** — pick a suggestion or type any model ID your
 key supports, so a newer model is never gated on an app update.
