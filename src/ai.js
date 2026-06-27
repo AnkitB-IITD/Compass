@@ -44,12 +44,12 @@ export const PROVIDERS = {
     label: 'Gemini (Google)',
     keyHint: 'AIza…',
     keyUrl: 'aistudio.google.com/apikey',
-    defaultModel: 'gemini-2.5-flash',
-    testModel: 'gemini-2.5-flash',
+    defaultModel: 'gemini-3.5-flash',
+    testModel: 'gemini-3.1-flash-lite',
     models: [
-      { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (recommended)' },
-      { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro (smartest)' },
-      { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (fastest)' },
+      { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash (recommended)' },
+      { id: 'gemini-3.1-pro', label: 'Gemini 3.1 Pro (smartest)' },
+      { id: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite (fastest)' },
     ],
     buildRequest({ key, model, system, userText, schema, maxTokens }) {
       const generationConfig = { maxOutputTokens: maxTokens };

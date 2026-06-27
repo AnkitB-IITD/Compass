@@ -44,9 +44,12 @@ Compass works with any of:
 
 | Provider | Get a key | Default model |
 |---|---|---|
-| **Gemini** (Google) | aistudio.google.com/apikey | `gemini-2.5-flash` |
+| **Gemini** (Google) | aistudio.google.com/apikey | `gemini-3.5-flash` |
 | **Claude** (Anthropic) | console.anthropic.com | `claude-sonnet-4-6` |
 | **OpenAI** | platform.openai.com/api-keys | `gpt-4.1-mini` |
+
+The model field is **editable** — pick a suggestion or type any model ID your
+key supports, so a newer model is never gated on an app update.
 
 Keys are stored per-provider in IndexedDB on your device only, and each is
 sent only to that provider's endpoint, only when you tap **Analyze**. Switch

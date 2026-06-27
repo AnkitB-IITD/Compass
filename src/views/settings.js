@@ -40,13 +40,25 @@ export async function settingsView({ navigate }) {
     autocomplete: 'off',
   });
   const keyStatus = el('span', { class: 'dim small' });
-  const modelSelect = el('select', {},
-    ...listModels(provider).map((m) => {
-      const opt = el('option', { value: m.id }, m.label);
-      if (m.id === model) opt.selected = true;
-      return opt;
-    }));
-  modelSelect.addEventListener('change', async () => { await setModel(modelSelect.value, provider); toast('Model updated'); });
+
+  // Model: editable so a stale suggestion list never blocks a newer model.
+  const listId = `models-${provider}`;
+  const modelList = el('datalist', { id: listId },
+    ...listModels(provider).map((m) => el('option', { value: m.id }, m.label)));
+  const modelInput = el('input', {
+    type: 'text',
+    list: listId,
+    value: model,
+    placeholder: conf.defaultModel,
+    'aria-label': 'Model',
+    autocomplete: 'off',
+    autocapitalize: 'off',
+    spellcheck: 'false',
+  });
+  modelInput.addEventListener('change', async () => {
+    const v = modelInput.value.trim();
+    if (v) { await setModel(v, provider); toast('Model updated'); }
+  });
 
   view.append(el('div', { class: 'card stack' },
     el('label', { class: 'field', style: 'margin-bottom:0' }, el('span', {}, 'Provider'), providerSelect),
@@ -77,9 +89,9 @@ export async function settingsView({ navigate }) {
       }, 'Remove key') : null,
       keyStatus,
     ),
-    el('label', { class: 'field', style: 'margin-bottom:0' }, el('span', {}, 'Model'), modelSelect),
+    el('label', { class: 'field', style: 'margin-bottom:0' }, el('span', {}, 'Model'), modelInput, modelList),
     el('p', { class: 'dim small', style: 'margin:0' },
-      `Get a key at ${conf.keyUrl}. Keys are stored per-provider on this device only, and sent only to ${conf.label} when you run an analysis.`),
+      `Pick a suggestion or type any model ID your key supports. Get a key at ${conf.keyUrl}. Keys are stored per-provider on this device only, and sent only to ${conf.label} when you run an analysis.`),
   ));
 
   /* ---- Check-ins ---- */

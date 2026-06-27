@@ -5,7 +5,7 @@
    Bump VERSION on every deploy to refresh caches.
    ============================================================ */
 
-const VERSION = 'compass-v2';
+const VERSION = 'compass-v3';
 
 const SHELL = [
   './',
